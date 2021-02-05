@@ -2,11 +2,14 @@ package com.example.PhotoApp.Controller;
 
 
 import com.example.PhotoApp.DTO.UserDTO;
+import com.example.PhotoApp.Exception.UserServiceException;
 import com.example.PhotoApp.Model.UserDetails;
+import com.example.PhotoApp.ResponseModel.ErrorMessages;
 import com.example.PhotoApp.ResponseModel.UserResponse;
 import com.example.PhotoApp.Service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +26,9 @@ public class UserController {
   @Autowired
   UserService userService;
 
-  @GetMapping(path = "/{UserId}")
+  @GetMapping(path = "/{UserId}",  produces = {
+      MediaType.APPLICATION_JSON_VALUE,
+      MediaType.APPLICATION_ATOM_XML_VALUE})
   public UserResponse  getUser(@PathVariable String UserId){
 
     UserResponse returnValue = new UserResponse();
@@ -33,9 +38,11 @@ public class UserController {
      return returnValue;
   }
 
-  @PostMapping
-  public UserResponse postUser(@RequestBody UserDetails userDetails ){
+  @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_ATOM_XML_VALUE}
+      , produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_ATOM_XML_VALUE})
+  public UserResponse postUser(@RequestBody UserDetails userDetails ) throws Exception{
 
+    if(userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
     UserResponse returnValue = new UserResponse();
 
     UserDTO userDto = new UserDTO();
